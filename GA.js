@@ -39,7 +39,7 @@ class GA {
     return [xLines, yLines];
   }
 
-  getFitness(xLinesTmp, yLinesTmp, goalPoint) {
+  getFitness(xLinesTmp, yLinesTmp, goalPoint, obstacles) {
 
     // We store lines
     const xLines = nj.array(xLinesTmp);
@@ -59,11 +59,22 @@ class GA {
 
     // Pythagorean theorem and fitness logic
     const distToGoal = nj.sqrt(xDist.add(yDist));
-    const fitness = nj.ones(distToGoal.shape).divide(distToGoal.add(1));
-    fitness.pow(2, false);
+    const fitness = nj.ones(distToGoal.shape).divide(distToGoal.add(1)).pow(2, false);
 
-    // Obstacle logic here...
-    return fitness;
+    // Collisions
+    const finalFitness = nj.array(fitness.tolist().map((fit, index) => {
+      let i = 0;
+      do {
+        if(xLinesTmp[index][i] > obstacles[0][0] - 0.5 && xLinesTmp[index][i] < obstacles[1][0] + 0.5
+        && yLinesTmp[index][i] > obstacles[0][1] - 3 && yLinesTmp[index][i] < obstacles[1][1] + 3) {
+          return [1e-6];
+        }
+        i++;
+      } while(i<xLinesTmp[index].length);
+      return fit;
+    }));
+
+    return finalFitness;
   }
 
   weightedRandom(weights, total) {
