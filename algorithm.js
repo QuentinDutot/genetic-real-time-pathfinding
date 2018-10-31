@@ -1,22 +1,21 @@
 class GA {
-  constructor(nMoves, crossRate, mutationRate, popSize, startPoint) {
-    this.dnaSize = 2 * nMoves;
+  constructor(growRate, crossRate, mutationRate, popSize, startPoint) {
+    this.growRate = growRate;
     this.crossRate = crossRate;
     this.mutationRate = mutationRate;
     this.popSize = popSize;
-    this.forceMutation = 0;
 
     this.pop = [];
-    this.bestIndex = 0;
-    this.fitnessSum = 0;
     for(let i = 0; i < popSize; i++) {
-      this.pop[i] = new Way(startPoint[0], startPoint[1], nMoves);
+      this.pop[i] = new Way(startPoint[0], startPoint[1], 10);
     }
   }
 
   draw(mode, scale) {
     if(mode === 'best') {
-      this.pop[this.bestIndex].draw(scale);
+      const maxFit = Math.max.apply(Math, this.pop.map(o => o.fitness));
+      const maxIndex = this.pop.findIndex(e => e.fitness === maxFit);
+      this.pop[maxIndex].draw(scale);
     } else {
       for(let i = 0; i < this.popSize; i++) {
         this.pop[i].draw(scale);
@@ -25,8 +24,6 @@ class GA {
   }
 
   fitness(xGoal, yGoal, obstacles) {
-    let best = 0;
-    this.fitnessSum = 0;
     for(let i = 0; i < this.popSize; i++) {
       const xCumSum = this.pop[i].getCumulativePath('x');
       const yCumSum = this.pop[i].getCumulativePath('y');
@@ -48,41 +45,39 @@ class GA {
         j++;
       } while(j < xCumSum.length && fit === fitness);
 
-      // Global fitness logic
-      this.fitnessSum += fit;
-      this.pop[i].fitness = fit;
-      if(fit > best) {
-        best = fit;
-        this.bestIndex = i;
-      }
-    }
-  }
+      // Optimize path
+      // fit = Math.min(1, fit + 1 / this.pop[i].size);
 
-  yep() {
-    let random = Math.random() * this.fitnessSum;
-    for(let j = 0; j < this.popSize; j++) {
-      if(random < this.pop[j].fitness) {
-        return j;
-      }
-      random -= this.pop[j].fitness;
+      this.pop[i].fitness = fit;
     }
   }
 
   evolve() {
     const pop = [];
+    const fitnessSum = this.pop.reduce((sum, current) => sum + current.fitness, 0);
 
-    // Select by fitness
     for(let i = 0; i < this.popSize; i++) {
-      const sel = this.pop[this.yep()];
-      pop[i] = new Way(sel.xPath[0], sel.yPath[0], sel.size);
-      pop[i].xPath = sel.xPath.slice(0);
-      pop[i].yPath = sel.yPath.slice(0);
-    }
+      let selected;
+      let random = Math.random() * fitnessSum;
 
-    // Crossover and mutations
-    for(let i = 0; i < this.popSize; i++) {
+      // Select by fitness
+      for(let j = 0; j < this.popSize; j++) {
+        if(random < this.pop[j].fitness) {
+          selected = this.pop[j];
+          break;
+        }
+        random -= this.pop[j].fitness;
+      }
+
+      // Deep clone
+      pop[i] = new Way(selected.xPath[0], selected.yPath[0], selected.size);
+      pop[i].xPath = selected.xPath.slice(0);
+      pop[i].yPath = selected.yPath.slice(0);
+
+      // Genetic actions
+      pop[i].grow(this.growRate);
       pop[i].crossover(this.crossRate, this.pop[Math.floor(Math.random() * this.popSize)]);
-      pop[i].mutate(this.mutationRate, this.forceMutation);
+      pop[i].mutate(this.mutationRate);
     }
 
     this.pop = pop.slice(0);
