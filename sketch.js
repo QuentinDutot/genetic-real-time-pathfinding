@@ -1,4 +1,3 @@
-const SCALE = 15;
 const GROW_RATE = 0.1;
 const CROSS_RATE = 0.8;
 const MUTATE_RATE = 0.0001;
@@ -6,42 +5,48 @@ const FORCE_MUTATE_RATE = 0.01;
 const FORCE_MUTATE = 500;
 const STARTING_POP_SIZE = 100;
 
+const SCALE = 15;
 const GOAL_POINT = [0, 0];
-const START_POINT = [window.innerWidth / 2 / SCALE, window.innerHeight / 2 / SCALE];
+const START_POINT = [window.innerWidth / 2, window.innerHeight / 2];
 const OBSTACLES = [
-  [2 * START_POINT[0] / 3, 5 * START_POINT[1] / 6], [2 * START_POINT[0] / 3, START_POINT[1] / 3],// left line
+  { // left line
+    xFrom: START_POINT[0] - 3 * SCALE,
+    yFrom: START_POINT[1] - 3 * SCALE,
+    xTo: START_POINT[0] - 2 * SCALE,
+    yTo:  START_POINT[1] + 3 * SCALE
+  },
 ];
 
 let ga;
 let mode;
 
-function drawPoints(start, goal, scale) {
+function drawPoints(start, goal) {
   fill('white');
-  rect((start[0]-0.5)*scale, (start[1]-0.5)*scale, scale, scale);
-  rect((goal[0]-0.5)*scale, (goal[1]-0.5)*scale, scale, scale);
+  rect(start[0] - SCALE / 2, start[1] - SCALE / 2, SCALE, SCALE);
+  rect(goal[0] - SCALE / 2, goal[1] - SCALE / 2, SCALE, SCALE);
 }
 
-function drawObstacles(obstacles, scale) {
+function drawObstacles(obstacles) {
   fill('white');
-  rect((obstacles[0][0]-0.5)*scale, (obstacles[0][1]-0.5)*scale, scale, (obstacles[1][1]-0.5)*scale);
+  rect(obstacles[0].xFrom, obstacles[0].yFrom, obstacles[0].xTo - obstacles[0].xFrom, obstacles[0].yTo - obstacles[0].yFrom);
 }
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  ga = new GA(START_POINT[0], START_POINT[1], STARTING_POP_SIZE, GROW_RATE, CROSS_RATE, MUTATE_RATE);
+  ga = new GA(START_POINT[0], START_POINT[1], STARTING_POP_SIZE, SCALE);
   mode = 'best';
 }
 
 function draw() {
   clear();
-  drawPoints(START_POINT, GOAL_POINT, SCALE);
-  drawObstacles(OBSTACLES, SCALE);
+  drawPoints(START_POINT, GOAL_POINT);
+  drawObstacles(OBSTACLES);
 
   if(!keyIsDown(ENTER)) return;
 
   ga.fitness(GOAL_POINT[0], GOAL_POINT[1], OBSTACLES);
-  ga.draw(mode, SCALE);
-  ga.evolve();
+  ga.draw(mode);
+  ga.evolve(GROW_RATE, CROSS_RATE, MUTATE_RATE);
 }
 
 function keyPressed() {
@@ -49,7 +54,7 @@ function keyPressed() {
 }
 
 function mouseMoved() {
-  GOAL_POINT[0] = mouseX / SCALE;
-  GOAL_POINT[1] = mouseY / SCALE;
+  GOAL_POINT[0] = mouseX;
+  GOAL_POINT[1] = mouseY;
   draw();
 }

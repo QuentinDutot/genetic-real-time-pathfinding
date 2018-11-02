@@ -1,7 +1,8 @@
 class Way {
-  constructor(xStart, yStart, size) {
+  constructor(xStart, yStart, size, scale) {
     this.fitness = 0;
     this.size = size;
+    this.scale = scale;
     this.xPath = [];
     this.yPath = [];
 
@@ -14,11 +15,11 @@ class Way {
     this.yPath[0] = yStart;
   }
 
-  draw(scale) {
+  draw() {
     const x = this.getCumulativePath('x');
     const y = this.getCumulativePath('y');
     for(let i = 1; i < this.size; i++) {
-      line(x[i - 1] * scale, y[i - 1] * scale, x[i] * scale, y[i] * scale);
+      line(x[i - 1], y[i - 1], x[i], y[i]);
     }
   }
 
@@ -53,7 +54,7 @@ class Way {
   }
 
   getRandomDirection() {
-    return Math.random() < 0.5 ? -0.25 : 0.25;
+    return this.scale * (Math.random() < 0.5 ? -0.25 : 0.25);
   }
 
   getCumulativePath(type) {

@@ -1,24 +1,20 @@
 class GA {
-  constructor(xStart, yStart, size, growRate, crossRate, mutationRate) {
-    this.growRate = growRate;
-    this.crossRate = crossRate;
-    this.mutationRate = mutationRate;
+  constructor(xStart, yStart, size, scale) {
     this.popSize = size;
-
     this.pop = [];
     for(let i = 0; i < this.popSize; i++) {
-      this.pop[i] = new Way(xStart, yStart, this.popSize);
+      this.pop[i] = new Way(xStart, yStart, this.popSize, scale);
     }
   }
 
-  draw(mode, scale) {
+  draw(mode) {
     if(mode === 'best') {
       const maxFit = Math.max.apply(Math, this.pop.map(o => o.fitness));
       const maxIndex = this.pop.findIndex(e => e.fitness === maxFit);
-      this.pop[maxIndex].draw(scale);
+      this.pop[maxIndex].draw();
     } else {
       for(let i = 0; i < this.popSize; i++) {
-        this.pop[i].draw(scale);
+        this.pop[i].draw();
       }
     }
   }
@@ -38,8 +34,8 @@ class GA {
       let j = 0;
       let fit = fitness;
       do {
-        if(xCumSum[i] > obstacles[0][0] - 0.5 && xCumSum[i] < obstacles[1][0] + 0.5
-        && yCumSum[i] > obstacles[0][1] - 0.5 && yCumSum[i] < obstacles[0][1] + obstacles[1][1] + 0.5) {
+        if(xCumSum[j] > obstacles[0].xFrom && xCumSum[j] < obstacles[0].xTo
+        && yCumSum[j] > obstacles[0].yFrom && yCumSum[j] < obstacles[0].yTo) {
           fit =  1e-6;
         }
         j++;
@@ -52,7 +48,7 @@ class GA {
     }
   }
 
-  evolve() {
+  evolve(growRate, crossRate, mutationRate) {
     const pop = [];
     const fitnessSum = this.pop.reduce((sum, current) => sum + current.fitness, 0);
 
@@ -70,14 +66,14 @@ class GA {
       }
 
       // Deep clone
-      pop[i] = new Way(selected.xPath[0], selected.yPath[0], selected.size);
+      pop[i] = new Way(selected.xPath[0], selected.yPath[0], selected.size, selected.scale);
       pop[i].xPath = selected.xPath.slice(0);
       pop[i].yPath = selected.yPath.slice(0);
 
       // Genetic actions
-      pop[i].grow(this.growRate);
-      pop[i].crossover(this.crossRate, this.pop[Math.floor(Math.random() * this.popSize)]);
-      pop[i].mutate(this.mutationRate);
+      pop[i].grow(growRate);
+      pop[i].crossover(crossRate, this.pop[Math.floor(Math.random() * this.popSize)]);
+      pop[i].mutate(mutationRate);
     }
 
     this.pop = pop.slice(0);
