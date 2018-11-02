@@ -3,7 +3,7 @@ class GA {
     this.popSize = size;
     this.pop = [];
     for(let i = 0; i < this.popSize; i++) {
-      this.pop[i] = new Way(xStart, yStart, this.popSize, scale);
+      this.pop[i] = new Way(xStart, yStart, scale);
     }
   }
 
@@ -31,24 +31,23 @@ class GA {
       const fitness = Math.pow(1 / (distToGoal + 1), 2);
 
       // Collisions
-      let j = 0;
       let fit = fitness;
-      do {
-        if(xCumSum[j] > obstacles[0].xFrom && xCumSum[j] < obstacles[0].xTo
-        && yCumSum[j] > obstacles[0].yFrom && yCumSum[j] < obstacles[0].yTo) {
-          fit =  1e-6;
+      for(let j = 0; j < this.pop[i].size; j++) {
+        for(let k = 0; k < obstacles.length; k++) {
+          if(xCumSum[j] > obstacles[k].xFrom && xCumSum[j] < obstacles[k].xTo
+          && yCumSum[j] > obstacles[k].yFrom && yCumSum[j] < obstacles[k].yTo) {
+            fit =  1e-6;
+            break;
+          }
         }
-        j++;
-      } while(j < xCumSum.length && fit === fitness);
-
-      // Optimize path
-      // fit = Math.min(1, fit + 1 / this.pop[i].size);
+        if(fit !== fitness) break;
+      }
 
       this.pop[i].fitness = fit;
     }
   }
 
-  evolve(growRate, crossRate, mutationRate) {
+  evolve(growRate, crossRate, mutationRate, goalMoved) {
     const pop = [];
     const fitnessSum = this.pop.reduce((sum, current) => sum + current.fitness, 0);
 
@@ -66,14 +65,15 @@ class GA {
       }
 
       // Deep clone
-      pop[i] = new Way(selected.xPath[0], selected.yPath[0], selected.size, selected.scale);
+      pop[i] = new Way(selected.xPath[0], selected.yPath[0], selected.scale);
+      if(!goalMoved) pop[i].size = selected.size;
       pop[i].xPath = selected.xPath.slice(0);
       pop[i].yPath = selected.yPath.slice(0);
 
       // Genetic actions
       pop[i].grow(growRate);
       pop[i].crossover(crossRate, this.pop[Math.floor(Math.random() * this.popSize)]);
-      pop[i].mutate(mutationRate);
+      pop[i].mutate(goalMoved ? 1 : mutationRate);
     }
 
     this.pop = pop.slice(0);

@@ -1,7 +1,7 @@
 class Way {
-  constructor(xStart, yStart, size, scale) {
+  constructor(xStart, yStart, scale) {
     this.fitness = 0;
-    this.size = size;
+    this.size = 2 * scale;
     this.scale = scale;
     this.xPath = [];
     this.yPath = [];
@@ -25,14 +25,15 @@ class Way {
 
   grow(rate) {
     if(Math.random() < rate) {
+      const index = Math.floor(Math.random() * this.size) + 1;
       if(Math.random() < 0.5) {
         this.size--;
-        this.xPath = this.xPath.slice(0, this.size);
-        this.yPath = this.yPath.slice(0, this.size);
+        this.xPath.splice(index, 1);
+        this.yPath.splice(index, 1);
       } else {
         this.size++;
-        this.xPath.push(this.getRandomDirection());
-        this.yPath.push(this.getRandomDirection());
+        this.xPath.splice(index, 0, this.getRandomDirection());
+        this.yPath.splice(index, 0, this.getRandomDirection());
       }
     }
   }
@@ -54,7 +55,7 @@ class Way {
   }
 
   getRandomDirection() {
-    return this.scale * (Math.random() < 0.5 ? -0.25 : 0.25);
+    return (Math.floor(Math.random() * 3) - 1) / 4 * this.scale;
   }
 
   getCumulativePath(type) {

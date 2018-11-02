@@ -1,24 +1,48 @@
-const GROW_RATE = 0.1;
+const GROW_RATE = 0.4;
 const CROSS_RATE = 0.8;
 const MUTATE_RATE = 0.0001;
-const FORCE_MUTATE_RATE = 0.01;
-const FORCE_MUTATE = 500;
 const STARTING_POP_SIZE = 100;
 
-const SCALE = 15;
+const SCALE = 25;
 const GOAL_POINT = [0, 0];
 const START_POINT = [window.innerWidth / 2, window.innerHeight / 2];
 const OBSTACLES = [
+  { // top line
+    xFrom: START_POINT[0] - 2 * SCALE,
+    yFrom: START_POINT[1] - 6 * SCALE,
+    xTo: START_POINT[0] + 2 * SCALE,
+    yTo:  START_POINT[1] - 5 * SCALE
+  },
+  { // right line
+    xFrom: START_POINT[0] + 4 * SCALE,
+    yFrom: START_POINT[1] - 2 * SCALE,
+    xTo: START_POINT[0] + 5 * SCALE,
+    yTo:  START_POINT[1] + 2 * SCALE
+  },
+  { // bottom line
+    xFrom: START_POINT[0] - 2 * SCALE,
+    yFrom: START_POINT[1] + 5 * SCALE,
+    xTo: START_POINT[0] + 2 * SCALE,
+    yTo:  START_POINT[1] + 6 * SCALE
+  },
   { // left line
-    xFrom: START_POINT[0] - 3 * SCALE,
-    yFrom: START_POINT[1] - 3 * SCALE,
-    xTo: START_POINT[0] - 2 * SCALE,
-    yTo:  START_POINT[1] + 3 * SCALE
+    xFrom: START_POINT[0] - 5 * SCALE,
+    yFrom: START_POINT[1] - 2 * SCALE,
+    xTo: START_POINT[0] - 4 * SCALE,
+    yTo:  START_POINT[1] + 2 * SCALE
   },
 ];
 
 let ga;
-let mode;
+let display;
+let goalMoved;
+
+function writeTuto() {
+  fill('black');
+  textSize(15);
+  text('Press ENTER to play pathfinding', 10, window.innerHeight - 26);
+  text('Press SPACE to show/hide the best way', 10, window.innerHeight - 10);
+}
 
 function drawPoints(start, goal) {
   fill('white');
@@ -28,33 +52,39 @@ function drawPoints(start, goal) {
 
 function drawObstacles(obstacles) {
   fill('white');
-  rect(obstacles[0].xFrom, obstacles[0].yFrom, obstacles[0].xTo - obstacles[0].xFrom, obstacles[0].yTo - obstacles[0].yFrom);
+  for(let i = 0; i < obstacles.length; i++) {
+    rect(obstacles[i].xFrom, obstacles[i].yFrom, obstacles[i].xTo - obstacles[i].xFrom, obstacles[i].yTo - obstacles[i].yFrom);
+  }
 }
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   ga = new GA(START_POINT[0], START_POINT[1], STARTING_POP_SIZE, SCALE);
-  mode = 'best';
+  display = 'best';
+  goalMoved = true;
 }
 
 function draw() {
   clear();
+  writeTuto();
   drawPoints(START_POINT, GOAL_POINT);
   drawObstacles(OBSTACLES);
 
   if(!keyIsDown(ENTER)) return;
 
+  ga.draw(display);
   ga.fitness(GOAL_POINT[0], GOAL_POINT[1], OBSTACLES);
-  ga.draw(mode);
-  ga.evolve(GROW_RATE, CROSS_RATE, MUTATE_RATE);
+  ga.evolve(GROW_RATE, CROSS_RATE, MUTATE_RATE, goalMoved);
+  goalMoved = false;
 }
 
 function keyPressed() {
-  if(keyCode === 32) mode = (mode === 'best' ? 'all' : 'best');
+  if(keyCode === 32) display = (display === 'best' ? 'all' : 'best');
 }
 
 function mouseMoved() {
   GOAL_POINT[0] = mouseX;
   GOAL_POINT[1] = mouseY;
+  goalMoved = true;
   draw();
 }
