@@ -6,8 +6,8 @@ class Way {
     this.yPath = [];
 
     for(let i = 0; i < this.size; i++) {
-      this.xPath[i] = Math.random() < 0.5 ? -0.25 : 0.25;
-      this.yPath[i] = Math.random() < 0.5 ? -0.25 : 0.25;
+      this.xPath[i] = this.getRandomDirection();
+      this.yPath[i] = this.getRandomDirection();
     }
 
     this.xPath[0] = xStart;
@@ -24,18 +24,14 @@ class Way {
 
   grow(rate) {
     if(Math.random() < rate) {
-      let extension = Math.floor(Math.random() * 10) - 5;
-      if(this.size + extension > 0) {
-        this.size += extension;
-        if(extension > 0) {
-          for(let i = 0; i < extension; i++) {
-            this.xPath.push(Math.random() < 0.5 ? -0.25 : 0.25);
-            this.yPath.push(Math.random() < 0.5 ? -0.25 : 0.25);
-          }
-        } else if(extension < 0) {
-          this.xPath = this.xPath.slice(0, this.size);
-          this.yPath = this.yPath.slice(0, this.size);
-        }
+      if(Math.random() < 0.5) {
+        this.size--;
+        this.xPath = this.xPath.slice(0, this.size);
+        this.yPath = this.yPath.slice(0, this.size);
+      } else {
+        this.size++;
+        this.xPath.push(this.getRandomDirection());
+        this.yPath.push(this.getRandomDirection());
       }
     }
   }
@@ -51,9 +47,13 @@ class Way {
 
   mutate(rate) {
     for(let i = 1; i < this.size; i++) {
-      if(Math.random() < rate) this.xPath[i] = Math.random() < 0.5 ? -0.25 : 0.25;
-      if(Math.random() < rate) this.yPath[i] = Math.random() < 0.5 ? -0.25 : 0.25;
+      if(Math.random() < rate) this.xPath[i] = this.getRandomDirection();
+      if(Math.random() < rate) this.yPath[i] = this.getRandomDirection();
     }
+  }
+
+  getRandomDirection() {
+    return Math.random() < 0.5 ? -0.25 : 0.25;
   }
 
   getCumulativePath(type) {

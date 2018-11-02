@@ -4,7 +4,7 @@ const CROSS_RATE = 0.8;
 const MUTATE_RATE = 0.0001;
 const FORCE_MUTATE_RATE = 0.01;
 const FORCE_MUTATE = 500;
-const POP_SIZE = 100;
+const STARTING_POP_SIZE = 100;
 
 const GOAL_POINT = [0, 0];
 const START_POINT = [window.innerWidth / 2 / SCALE, window.innerHeight / 2 / SCALE];
@@ -28,7 +28,7 @@ function drawObstacles(obstacles, scale) {
 
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
-  ga = new GA(GROW_RATE, CROSS_RATE, MUTATE_RATE, POP_SIZE, START_POINT);
+  ga = new GA(START_POINT[0], START_POINT[1], STARTING_POP_SIZE, GROW_RATE, CROSS_RATE, MUTATE_RATE);
   mode = 'best';
 }
 
@@ -45,12 +45,11 @@ function draw() {
 }
 
 function keyPressed() {
-  if(keyCode === 32) {
-    mode = (mode === 'best' ? 'all' : 'best');
-  }
+  if(keyCode === 32) mode = (mode === 'best' ? 'all' : 'best');
 }
 
 function mouseMoved() {
   GOAL_POINT[0] = mouseX / SCALE;
   GOAL_POINT[1] = mouseY / SCALE;
+  draw();
 }

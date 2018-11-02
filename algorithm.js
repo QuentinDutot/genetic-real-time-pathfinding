@@ -1,13 +1,13 @@
 class GA {
-  constructor(growRate, crossRate, mutationRate, popSize, startPoint) {
+  constructor(xStart, yStart, size, growRate, crossRate, mutationRate) {
     this.growRate = growRate;
     this.crossRate = crossRate;
     this.mutationRate = mutationRate;
-    this.popSize = popSize;
+    this.popSize = size;
 
     this.pop = [];
-    for(let i = 0; i < popSize; i++) {
-      this.pop[i] = new Way(startPoint[0], startPoint[1], 10);
+    for(let i = 0; i < this.popSize; i++) {
+      this.pop[i] = new Way(xStart, yStart, this.popSize);
     }
   }
 
