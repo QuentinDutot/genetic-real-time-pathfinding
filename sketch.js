@@ -3,7 +3,7 @@ const CROSS_RATE = 0.8;
 const MUTATE_RATE = 0.0001;
 const STARTING_POP_SIZE = 100;
 
-const SCALE = 25;
+const SCALE = 30;
 const GOAL_POINT = [0, 0];
 const START_POINT = [window.innerWidth / 2, window.innerHeight / 2];
 const OBSTACLES = [
@@ -39,8 +39,8 @@ let goalMoved;
 
 function writeTuto() {
   fill('black');
-  textSize(15);
-  text('Press ENTER to play pathfinding', 10, window.innerHeight - 26);
+  textSize(16);
+  text('Press ENTER to play pathfinding', 10, window.innerHeight - 28);
   text('Press SPACE to show/hide the best way', 10, window.innerHeight - 10);
 }
 
@@ -60,7 +60,7 @@ function drawObstacles(obstacles) {
 function setup() {
   createCanvas(window.innerWidth, window.innerHeight);
   ga = new GA(START_POINT[0], START_POINT[1], STARTING_POP_SIZE, SCALE);
-  display = 'best';
+  display = 'all';
   goalMoved = true;
 }
 
